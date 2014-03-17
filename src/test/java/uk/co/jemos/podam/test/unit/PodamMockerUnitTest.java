@@ -29,26 +29,8 @@ import uk.co.jemos.podam.api.PodamFactory;
 import uk.co.jemos.podam.api.PodamFactoryImpl;
 import uk.co.jemos.podam.api.RandomDataProviderStrategy;
 import uk.co.jemos.podam.exceptions.PodamMockeryException;
-import uk.co.jemos.podam.test.dto.AbstractTestPojo;
-import uk.co.jemos.podam.test.dto.CollectionsPojo;
-import uk.co.jemos.podam.test.dto.ConstructorWithSelfReferencesButNoDefaultConstructorPojo;
-import uk.co.jemos.podam.test.dto.ConstructorWithSelfReferencesPojo;
-import uk.co.jemos.podam.test.dto.EnumsPojo;
+import uk.co.jemos.podam.test.dto.*;
 import uk.co.jemos.podam.test.dto.EnumsPojo.RatePodamInternal;
-import uk.co.jemos.podam.test.dto.ExcludeAnnotationPojo;
-import uk.co.jemos.podam.test.dto.ImmutableNoHierarchicalAnnotatedPojo;
-import uk.co.jemos.podam.test.dto.ImmutableNonAnnotatedPojo;
-import uk.co.jemos.podam.test.dto.ImmutableWithGenericCollectionsPojo;
-import uk.co.jemos.podam.test.dto.ImmutableWithNonGenericCollectionsPojo;
-import uk.co.jemos.podam.test.dto.InterfacePojo;
-import uk.co.jemos.podam.test.dto.NoDefaultConstructorPojo;
-import uk.co.jemos.podam.test.dto.NoSetterWithCollectionInConstructorPojo;
-import uk.co.jemos.podam.test.dto.OneDimensionalChildPojo;
-import uk.co.jemos.podam.test.dto.OneDimensionalTestPojo;
-import uk.co.jemos.podam.test.dto.PrivateNoArgConstructorPojo;
-import uk.co.jemos.podam.test.dto.RecursivePojo;
-import uk.co.jemos.podam.test.dto.SimplePojoToTestSetters;
-import uk.co.jemos.podam.test.dto.SingletonWithParametersInStaticFactoryPojo;
 import uk.co.jemos.podam.test.dto.annotations.BooleanValuePojo;
 import uk.co.jemos.podam.test.dto.annotations.ByteValuePojo;
 import uk.co.jemos.podam.test.dto.annotations.ByteValueWithErrorPojo;
@@ -115,6 +97,32 @@ public class PodamMockerUnitTest {
 		AbstractTestPojo pojo = factory.manufacturePojo(AbstractTestPojo.class);
 		Assert.assertNull("The abstract pojo should be null!", pojo);
 	}
+
+    @Test
+    public void testMockerForAbstractClassWithConcreteSpecified() {
+        // Trying to create an abstract class with a specified concrete
+        // implementation should be fine
+        final PodamFactory factory = new PodamFactoryImpl(strategy)
+                .addConcrete(AbstractTestPojo.class, ConcreteTestPojo.class);
+        AbstractTestPojo pojo = factory.manufacturePojo(AbstractTestPojo.class);
+        Assert.assertNotNull(
+                "The abstract pojo should not be null since a concrete impl has been specified",
+                pojo
+        );
+    }
+
+    @Test
+    public void testMockerForEmbeddedAbstractClassWithConcreteSpecified() {
+        // Trying to create an abstract class with a specified concrete
+        // implementation should be fine
+        final PodamFactory factory = new PodamFactoryImpl(strategy)
+                .addConcrete(AbstractTestPojo.class, ConcreteTestPojo.class);
+        EmbeddedAbstractFieldTestPojo pojo = factory.manufacturePojo(EmbeddedAbstractFieldTestPojo.class);
+        Assert.assertNotNull(
+                "The abstract embedded pojo should not be null since a concrete impl has been specified",
+                pojo.getPojo()
+        );
+    }
 
 	@Test
 	public void testMockerForInterface() {
