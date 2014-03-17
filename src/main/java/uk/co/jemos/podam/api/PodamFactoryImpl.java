@@ -86,6 +86,12 @@ public class PodamFactoryImpl implements PodamFactory {
 	 */
 	private List<Class<? extends Annotation>> excludeAnnotations;
 
+    /**
+     * A list of user-submitted concrete implementations for interfaces
+     * and abstract classes
+     */
+    private final Map<Class<?>, Class<?>> concreteTypes = new HashMap<Class<?>, Class<?>>();
+
 	// ------------------->> Constructors
 
 	/**
@@ -137,6 +143,18 @@ public class PodamFactoryImpl implements PodamFactory {
 	public DataProviderStrategy getStrategy() {
 		return strategy;
 	}
+
+    /**
+     * Bind an interface/abstract class to a concrete implementation
+     *
+     * @param abstractClass the interface/abstract class to bind
+     * @param concreteClass the concrete class to be used when we encounter this interface/abstract class
+     * @return itself
+     */
+    public <T> PodamFactoryImpl addConcrete(final Class<T> abstractClass, final Class<? extends T> concreteClass) {
+        this.concreteTypes.put(abstractClass, concreteClass);
+        return this;
+    }
 
 	// ------------------->> Private methods
 
@@ -1342,8 +1360,16 @@ public class PodamFactoryImpl implements PodamFactory {
 
 			if (pojoClass.isInterface()
 					|| Modifier.isAbstract(pojoClass.getModifiers())) {
-				LOG.warn("Cannot instantiate an interface or abstract class. Returning null.");
-				return null;
+                if (this.concreteTypes.containsKey(pojoClass)) {
+                    return this.manufacturePojoInternal(
+                            (Class<T>) this.concreteTypes.get(pojoClass),
+                            pojos,
+                            genericTypeArgs
+                    );
+                } else {
+				    LOG.warn("Cannot instantiate an interface or abstract class. Returning null.");
+				    return null;
+                }
 			}
 
 			ClassInfo classInfo = PodamUtils.getClassInfo(pojoClass,
